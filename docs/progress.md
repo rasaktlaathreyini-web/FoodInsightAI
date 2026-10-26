@@ -97,3 +97,19 @@ FoodInsightAI can now combine structured USDA nutrition data with a locally runn
 * Improve nutrition data search and handling of missing nutrient values.
 * Expand automated test coverage.
 * Continue developing the nutrition assistant.
+
+## Day 9: Reusable Nutrition Food Matching
+
+### Work Completed
+- Added a reusable helper to load nutrition data and match food descriptions.
+- Removed duplicated food-matching logic from the search and nutrition summary functions.
+- Preserved case-insensitive partial matching and custom data directory support.
+- Added regression tests for case-insensitive matching and unknown foods.
+
+### Validation
+- Confirmed that the existing 17 tests passed after the refactor.
+- Added two regression tests for the shared matching helper.
+
+### Next Steps
+- Improve food matching and handling of missing nutrient values.
+- Test nutrition queries against more real USDA food records.

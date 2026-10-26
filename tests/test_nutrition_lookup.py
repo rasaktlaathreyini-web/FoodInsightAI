@@ -1,7 +1,34 @@
 ﻿import pandas as pd
 import pytest
 
-from src.ingest.nutrition_lookup import get_food_nutrition, search_nutrition
+from src.ingest.nutrition_lookup import (
+    _find_matching_foods,
+    get_food_nutrition,
+    search_nutrition,
+)
+
+
+def test_find_matching_foods_is_case_insensitive(tmp_path):
+    create_test_data(tmp_path)
+
+    result = _find_matching_foods(
+        "HUMMUS",
+        data_dir=tmp_path,
+    )
+
+    assert not result.empty
+    assert result["description"].eq("Test Hummus").all()
+
+
+def test_find_matching_foods_returns_empty_for_unknown_food(tmp_path):
+    create_test_data(tmp_path)
+
+    result = _find_matching_foods(
+        "unknown_food_xyz",
+        data_dir=tmp_path,
+    )
+
+    assert result.empty
 
 
 def create_test_data(data_dir):

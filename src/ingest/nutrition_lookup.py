@@ -1,3 +1,4 @@
+
 from pathlib import Path
 
 import pandas as pd
@@ -61,18 +62,11 @@ def load_nutrition_data(data_dir=DATA_DIR):
     return measurements
 
 
-def search_nutrition(query, data_dir=DATA_DIR, limit=10):
-    """Search foods and return available nutrient information."""
-
-    if not isinstance(query, str) or not query.strip():
-        raise ValueError("Search query must be a non-empty string.")
-
-    if limit < 1:
-        raise ValueError("Limit must be at least 1.")
+def _find_matching_foods(query, data_dir=DATA_DIR):
+    """Load nutrition data and find foods matching a partial name."""
 
     data = load_nutrition_data(data_dir)
 
-    # Prefer Foundation Foods when available.
     matches = data[
         data["description"].str.contains(
             query.strip(),
@@ -81,6 +75,20 @@ def search_nutrition(query, data_dir=DATA_DIR, limit=10):
             regex=False,
         )
     ].copy()
+
+    return matches
+
+
+def search_nutrition(query, data_dir=DATA_DIR, limit=10):
+    """Search foods and return available nutrient information."""
+
+    if not isinstance(query, str) or not query.strip():
+        raise ValueError("Search query must be a non-empty string.")
+
+    if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1:
+        raise ValueError("Limit must be a positive integer.")
+
+    matches = _find_matching_foods(query, data_dir)
 
     if matches.empty:
         return pd.DataFrame(
@@ -94,7 +102,7 @@ def search_nutrition(query, data_dir=DATA_DIR, limit=10):
             ]
         )
 
-    # Prefer foundation_food records, then other food types.
+    # Prefer Foundation Foods when available.
     priority = {
         "foundation_food": 0,
         "sample_food": 1,
@@ -136,17 +144,7 @@ def get_food_nutrition(query, data_dir=DATA_DIR):
     if not isinstance(query, str) or not query.strip():
         raise ValueError("Search query must be a non-empty string.")
 
-    data = load_nutrition_data(data_dir)
-
-    # Find matching food descriptions.
-    matches = data[
-        data["description"].str.contains(
-            query.strip(),
-            case=False,
-            na=False,
-            regex=False,
-        )
-    ].copy()
+    matches = _find_matching_foods(query, data_dir)
 
     if matches.empty:
         return None
