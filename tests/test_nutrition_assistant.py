@@ -49,3 +49,29 @@ def test_sends_retrieved_nutrition_data_to_llm():
     prompt = mock_llm.call_args.args[0]
     assert "Hummus, commercial" in prompt
     assert "7.35" in prompt
+
+def test_prompt_rejects_unsupported_nutrition_claims():
+    nutrition_data = {
+        "food": "Hummus, commercial",
+        "fdc_id": 321358,
+        "data_type": "foundation_food",
+        "nutrition": {
+            "Calories": {"amount": 229.0, "unit": "KCAL"},
+        },
+    }
+
+    with (
+        patch(
+            "src.nutrition_assistant.get_food_nutrition",
+            return_value=nutrition_data,
+        ),
+        patch(
+            "src.nutrition_assistant.ask_llm",
+            return_value="Hummus contains 229 KCAL.",
+        ) as mock_llm,
+    ):
+        answer_nutrition_question("hummus")
+
+    prompt = mock_llm.call_args.args[0].lower()
+    assert "daily recommended intake percentages" in prompt
+    assert "unsupported health claims" in prompt

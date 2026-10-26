@@ -70,7 +70,7 @@ def search_nutrition(query, data_dir=DATA_DIR, limit=10):
     if limit < 1:
         raise ValueError("Limit must be at least 1.")
 
-    data = load_nutrition_data()
+    data = load_nutrition_data(data_dir)
 
     # Prefer Foundation Foods when available.
     matches = data[

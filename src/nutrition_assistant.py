@@ -10,11 +10,12 @@ def answer_nutrition_question(food_query: str) -> str:
     if not isinstance(food_query, str) or not food_query.strip():
         raise ValueError("Food query must be a non-empty string.")
 
-    nutrition_data = get_food_nutrition(food_query.strip())
+    query = food_query.strip()
+    nutrition_data = get_food_nutrition(query)
 
     if nutrition_data is None:
         return (
-            f"I couldn't find nutrition information for '{food_query}' "
+            f"I couldn't find nutrition information for '{query}' "
             "in the available USDA dataset. Try another food name."
         )
 
@@ -28,19 +29,25 @@ USDA nutrition data:
 
 Instructions:
 - Use only the nutrition values provided in the USDA data.
-- Do not invent missing nutrient values.
+- Never invent, estimate, or change nutrient measurements.
 - Include the food description in your answer.
-- Include units for every nutrient value.
+- Include the original units for every nutrient value.
 - If a nutrient is missing, clearly say it is not available.
-- Explain the result in simple language.
+- Do not invent daily recommended intake percentages or daily values.
+- Do not make unsupported health claims.
+- Do not call a food healthy or unhealthy based on insufficient data.
+- Do not claim a nutrient is a good or poor source without supporting data.
+- Explain the available information in simple language.
+- Clarify that values refer to the specific USDA food record provided.
 """
 
     return ask_llm(
         prompt,
         system=(
-            "You are a food and nutrition assistant. "
-            "Use the supplied USDA data as the source of nutrition values. "
-            "Never invent nutrition measurements."
+            "You are a careful food and nutrition assistant. "
+            "Use supplied USDA data as the source of nutrition measurements. "
+            "Never invent measurements, daily-value percentages, or health claims. "
+            "If the data does not support a conclusion, say so."
         ),
     )
 

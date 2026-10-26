@@ -1,7 +1,7 @@
-import pandas as pd
+﻿import pandas as pd
 import pytest
 
-from src.ingest.nutrition_lookup import get_food_nutrition
+from src.ingest.nutrition_lookup import get_food_nutrition, search_nutrition
 
 
 def create_test_data(data_dir):
@@ -76,3 +76,32 @@ def test_returns_none_for_unknown_food(tmp_path):
 def test_rejects_empty_query(tmp_path):
     with pytest.raises(ValueError):
         get_food_nutrition("", data_dir=tmp_path)
+
+def test_search_nutrition_uses_custom_data_directory(tmp_path):
+    create_test_data(tmp_path)
+
+    result = search_nutrition("hummus", data_dir=tmp_path)
+
+    assert not result.empty
+    assert result["description"].eq("Test Hummus").all()
+
+
+def test_search_nutrition_returns_empty_for_unknown_food(tmp_path):
+    create_test_data(tmp_path)
+
+    result = search_nutrition(
+        "unknown_food_xyz",
+        data_dir=tmp_path,
+    )
+
+    assert result.empty
+
+
+def test_search_nutrition_rejects_empty_query(tmp_path):
+    with pytest.raises(ValueError):
+        search_nutrition("", data_dir=tmp_path)
+
+
+def test_search_nutrition_rejects_invalid_limit(tmp_path):
+    with pytest.raises(ValueError):
+        search_nutrition("hummus", data_dir=tmp_path, limit=0)
