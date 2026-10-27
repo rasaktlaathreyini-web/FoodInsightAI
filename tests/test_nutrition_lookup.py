@@ -132,3 +132,23 @@ def test_search_nutrition_rejects_empty_query(tmp_path):
 def test_search_nutrition_rejects_invalid_limit(tmp_path):
     with pytest.raises(ValueError):
         search_nutrition("hummus", data_dir=tmp_path, limit=0)
+def test_missing_nutrient_amount_is_not_reported_as_zero(tmp_path):
+    create_test_data(tmp_path)
+
+    # Read the test nutrition data.
+    measurements = pd.read_csv(tmp_path / "food_nutrient.csv")
+
+    # Simulate a missing protein measurement.
+    measurements.loc[
+        measurements["nutrient_id"] == 1003, "amount"
+    ] = float("nan")
+
+    measurements.to_csv(
+        tmp_path / "food_nutrient.csv",
+        index=False,
+    )
+
+    result = get_food_nutrition("hummus", data_dir=tmp_path)
+
+    assert result is not None
+    assert result["nutrition"]["Protein"]["amount"] is None

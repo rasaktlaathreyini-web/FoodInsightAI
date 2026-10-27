@@ -6,6 +6,7 @@ import pandas as pd
 from src.ingest.usda_loader import load_usda_csv
 
 
+
 DATA_DIR = Path("data/raw/foundation")
 
 # USDA nutrient IDs
@@ -195,6 +196,7 @@ def get_food_nutrition(query, data_dir=DATA_DIR):
         "nutrition": {},
     }
 
+
     # Choose the first available measurement for each nutrient.
     for label, possible_names in nutrient_names.items():
         for nutrient_name in possible_names:
@@ -204,11 +206,18 @@ def get_food_nutrition(query, data_dir=DATA_DIR):
 
             if not rows.empty:
                 row = rows.iloc[0]
+                amount = row["amount"]
+
+                if pd.isna(amount):
+                    amount = None
+                else:
+                    amount = float(amount)
 
                 summary["nutrition"][label] = {
-                    "amount": row["amount"],
+                    "amount": amount,
                     "unit": row["unit_name"],
                 }
                 break
 
     return summary
+
